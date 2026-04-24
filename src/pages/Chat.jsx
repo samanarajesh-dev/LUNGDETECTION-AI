@@ -108,18 +108,21 @@ export default function Chat() {
   };
 
   const startChatWithContext = () => {
-    setPhase('chat');
-    const contextText = `I have completed my health assessment.
-    Summary:
-    - Cough: ${assessmentData.coughDays} days (${assessmentData.sputum} sputum)
-    - Breath: ${assessmentData.shortnessOfBreath}
-    - Chest Pain: ${assessmentData.chestPain}
-    - Fever: ${assessmentData.fever}
-    - Energy: ${assessmentData.fatigue}
-    - Weight Change: ${assessmentData.weightLoss}
-    - Environment/History: ${assessmentData.smoker}`;
-    
-    handleSend(contextText, true);
+    setIsLoading(true); // Show loader during transition
+    setTimeout(() => {
+      setPhase('chat');
+      const contextText = `I have completed my health assessment.
+      Summary:
+      - Cough: ${assessmentData.coughDays} days (${assessmentData.sputum} sputum)
+      - Breath: ${assessmentData.shortnessOfBreath}
+      - Chest Pain: ${assessmentData.chestPain}
+      - Fever: ${assessmentData.fever}
+      - Energy: ${assessmentData.fatigue}
+      - Weight Change: ${assessmentData.weightLoss}
+      - Environment/History: ${assessmentData.smoker}`;
+      
+      handleSend(contextText, true);
+    }, 2000); // 2 second simulation for "Wow" factor
   };
 
   // --- Chat Logic ---
@@ -143,19 +146,29 @@ export default function Chat() {
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
         
         const prompt = isInitialContext 
-          ? `You are a Professional Pulmonology Specialist. The patient just completed a detailed health assessment:
+          ? `You are a Professional Pulmonology Specialist. 
+             URGENT: The patient has finished an assessment. You MUST provide a clear SUSPECTED DIAGNOSIS based on these details:
              ${text}
              
-             Analyze this clinical data and provide a professional, friendly, and structured report in Markdown:
-             1. 🩺 Clinical Impression
-             2. ⚠️ Risk Analysis (Categorize as Low/Moderate/High)
-             3. 🛑 Emergency Cautions (Specific red flags to watch for)
-             4. 📋 Recommended Actions (Tests like X-Ray, rest, hydration, specialist visit)
+             Structure your response exactly like this:
+             # 🩺 Suspected Clinical Condition: [Name of Most Likely Condition]
              
-             Keep the tone clinical but reassuring. End with a standard medical disclaimer.`
+             ### 🔍 Diagnostic Rationale
+             [Explain why you suspect this based on their symptoms]
+             
+             ### ⚠️ Risk & Severity Level
+             [Low/Moderate/High] - [Brief explanation]
+             
+             ### 🛑 Emergency Red Flags
+             [What they must watch for immediately]
+             
+             ### 📋 Next Clinical Steps
+             [Specific tests or actions]
+             
+             Disclaimer: This is an AI-generated screening and not a definitive medical diagnosis.`
           : `Patient message: "${text}". 
              Patient Context: ${JSON.stringify(assessmentData)}.
-             As a Pulmonology Specialist, respond professionally and stay focused on lung health.`;
+             As a Pulmonology Specialist, respond professionally.`;
 
         const response = await fetch(geminiUrl, {
           method: 'POST',
