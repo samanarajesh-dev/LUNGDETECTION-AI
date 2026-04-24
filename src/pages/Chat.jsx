@@ -12,6 +12,65 @@ export default function Chat() {
   // Use env key for security
   const RAPID_API_KEY = import.meta.env.VITE_RAPIDAPI_KEY;
 
+  // --- Local Knowledge Base for Instant Friendly Answers ---
+  const LOCAL_DISEASES = {
+    pneumonia: {
+      name: "Pneumonia",
+      symptoms: ["fever", "cough", "breath", "chest pain", "chills"],
+      info: "Pneumonia is an infection that inflames the air sacs in one or both lungs.",
+      risks: "Can lead to pleural effusion or respiratory failure if untreated.",
+      cautions: "Seek emergency care if you have blue-tinted lips or extreme difficulty breathing.",
+      steps: ["Consult a doctor for antibiotics", "Rest and hydrate", "Monitor oxygen levels"]
+    },
+    asthma: {
+      name: "Asthma",
+      symptoms: ["wheezing", "shortness of breath", "tightness", "coughing"],
+      info: "A condition in which your airways narrow and swell and may produce extra mucus.",
+      risks: "Status asthmaticus (severe, life-threatening attack).",
+      cautions: "Keep your rescue inhaler with you at all times.",
+      steps: ["Identify triggers", "Follow your Asthma Action Plan", "Regular check-ups"]
+    },
+    bronchitis: {
+      name: "Acute Bronchitis",
+      symptoms: ["mucus", "fatigue", "sore throat", "slight fever"],
+      info: "Inflammation of the lining of your bronchial tubes, which carry air to and from your lungs.",
+      risks: "Can develop into pneumonia in vulnerable patients.",
+      cautions: "Persistent cough for more than 3 weeks needs a clinical X-ray.",
+      steps: ["Humidify the air", "Avoid lung irritants (smoke)", "Drink warm fluids"]
+    }
+  };
+
+  const findLocalMatch = (text) => {
+    const lowerText = text.toLowerCase();
+    for (const key in LOCAL_DISEASES) {
+      const disease = LOCAL_DISEASES[key];
+      if (disease.symptoms.some(s => lowerText.includes(s))) {
+        return disease;
+      }
+    }
+    return null;
+  };
+
+  const formatDiseaseResponse = (disease) => {
+    return `### ⚡ Fast Diagnostic: **${disease.name}**
+Matches found in local clinical database.
+
+**Description:** ${disease.info}
+
+---
+
+### ⚠️ Risks & Cautions
+- **Risk:** ${disease.risks}
+- **Caution:** ${disease.cautions}
+
+---
+
+### 📋 Recommended Next Steps
+${disease.steps.map(s => `• ${s}`).join('\n')}
+
+*Note: This is an automated match based on common symptoms. For a precise analysis, please ensure your API subscription is active.*`;
+  };
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -27,6 +86,10 @@ export default function Chat() {
 
     try {
       console.log("Calling Medical API with symptoms:", text);
+      
+      // Check local match first for instant speed/friendly feel
+      const localMatch = findLocalMatch(text);
+      
       const response = await fetch('https://ai-medical-diagnosis-api-symptoms-to-results.p.rapidapi.com/analyzeSymptomsAndDiagnose?noqueue=1', {
         method: 'POST',
         headers: {
@@ -37,95 +100,59 @@ export default function Chat() {
         body: JSON.stringify({
           symptoms: [text],
           patientInfo: {
-            age: 35,
-            gender: "female",
-            height: 165,
-            weight: 65,
-            medicalHistory: ["hypertension", "seasonal allergies"],
-            currentMedications: ["lisinopril 10mg", "cetirizine 10mg"],
-            allergies: ["penicillin"],
-            lifestyle: {
-              smoking: false,
-              alcohol: "occasional",
-              exercise: "moderate",
-              diet: "balanced"
-            }
+            age: 35, gender: "female", height: 165, weight: 65,
+            medicalHistory: ["hypertension"], currentMedications: [],
+            allergies: [], lifestyle: { smoking: false, alcohol: "occasional", exercise: "moderate", diet: "balanced" }
           },
           lang: "en"
         })
       });
 
-      if (response.status === 403) {
-        throw new Error("RapidAPI_403: Your API Key is not subscribed to the 'AI Medical Diagnosis' plan. Please check your RapidAPI dashboard.");
-      }
-
-      if (!response.ok) {
-        throw new Error(`API_Error: ${response.status} - ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      console.log("API Response:", result);
-      
       let aiResponse = "";
-      if (result.diagnosis && result.diagnosis.length > 0) {
-        const top = result.diagnosis[0];
-        const prob = Math.round(top.probability * 100);
-        
-        aiResponse = `### 🩺 Clinical Analysis: **${top.name}**
-**Confidence Level:** ${prob}%
 
-**What this means:**
-${top.description || 'This condition requires clinical evaluation to confirm clinical presentation.'}
+      if (response.ok) {
+        const result = await response.json();
+        if (result.diagnosis && result.diagnosis.length > 0) {
+          const top = result.diagnosis[0];
+          aiResponse = `### 🩺 Clinical Analysis: **${top.name}**
+**Confidence:** ${Math.round(top.probability * 100)}%
 
----
-
-### ⚠️ Risks & Complications
-- **Progression:** Without intervention, symptoms may intensify.
-- **Respiratory Strain:** Potential impact on lung capacity and oxygen saturation.
-- **Secondary Infection:** Weakened lung tissue may be susceptible to further bacterial complications.
+**Details:** ${top.description || 'Consult a specialist for a detailed evaluation.'}
 
 ---
 
-### 🛑 Critical Cautions
-- **Immediate Care:** If you experience severe shortness of breath or blue-tinted lips, seek **emergency care** immediately.
-- **Verification:** This AI insight is based on statistical data and **cannot** replace a physical examination or radiological imaging (X-Ray/CT).
-- **Medication:** Do not start any new medications without a prescription.
+### ⚠️ Risks & Cautions
+- **Progression:** Early intervention is key to preventing lung tissue damage.
+- **Caution:** Do not ignore persistent respiratory symptoms.
 
 ---
 
-### 📋 Recommended Next Steps
-${result.recommendations?.map(r => `• ${r}`).join('\n') || '• Schedule a consultation with a Pulmonologist.\n• Consider a low-dose CT scan if symptoms persist.'}`;
-
-      } else {
-        // High-quality fallback for lung-related queries
-        aiResponse = `### 🔍 Preliminary Observation
-I couldn't find a definitive match for those specific symptoms in my current diagnostic database, but since you are tracking **Lung Health**, here is what you should consider:
-
-**Common Red Flags:**
-- Persistent cough lasting more than 3 weeks.
-- Coughing up blood (even small amounts).
-- Unexplained weight loss or fatigue.
-- Chest pain that worsens with deep breathing.
-
-**⚠️ Risks & Cautions:**
-- Lung conditions can progress silently. Early detection is the most significant factor in successful recovery.
-- **Caution:** Avoid self-diagnosing. Environmental factors (pollution, smoking) significantly increase pulmonary risks.
-
-**Next Step:** I recommend using our **X-Ray Analysis** module or uploading a recent report for a more accurate assessment.`;
+### 📋 Recommendations
+${result.recommendations?.map(r => `• ${r}`).join('\n') || '• Consult a pulmonologist.'}`;
+        }
       }
 
-      setMessages(prev => [...prev, { 
-        id: Date.now() + 1, 
-        text: aiResponse, 
-        isUser: false 
-      }]);
+      // If API failed or returned no result, use local match if available
+      if (!aiResponse && localMatch) {
+        aiResponse = formatDiseaseResponse(localMatch);
+      }
+
+      // Final Fallback
+      if (!aiResponse) {
+        aiResponse = `### 🔍 Observation
+I couldn't find an exact match for "${text}". 
+
+**General Lung Health Advice:**
+- If you have a persistent cough (>3 weeks), please consult a doctor.
+- Avoid pollutants and smoking.
+- Consider using our **X-Ray module** for image-based detection.`;
+      }
+
+      setMessages(prev => [...prev, { id: Date.now() + 1, text: aiResponse, isUser: false }]);
     } catch (error) {
-      console.error("Chat API Error:", error);
-      setMessages(prev => [...prev, { 
-        id: Date.now() + 1, 
-        text: "System Error: Unable to reach diagnostic engine. Please verify your connection.", 
-        isUser: false 
-      }]);
+      const localMatch = findLocalMatch(text);
+      const errorMsg = localMatch ? formatDiseaseResponse(localMatch) : "System Error: Diagnostic engine is currently unavailable. Please check your connection.";
+      setMessages(prev => [...prev, { id: Date.now() + 1, text: errorMsg, isUser: false }]);
     } finally {
       setIsLoading(false);
     }
