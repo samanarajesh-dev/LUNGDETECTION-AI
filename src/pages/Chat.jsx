@@ -9,8 +9,8 @@ export default function Chat() {
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef(null);
 
-  // Use env key for security
   const RAPID_API_KEY = import.meta.env.VITE_RAPIDAPI_KEY;
+  const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
   // --- Local Knowledge Base for Instant Friendly Answers ---
   const LOCAL_DISEASES = {
@@ -85,67 +85,60 @@ ${disease.steps.map(s => `• ${s}`).join('\n')}
     setIsLoading(true);
 
     try {
-      console.log("Calling Medical API with symptoms:", text);
+      console.log("Analyzing with Gemini Pro...");
       
-      // Check local match first for instant speed/friendly feel
       const localMatch = findLocalMatch(text);
-      
-      const response = await fetch('https://ai-medical-diagnosis-api-symptoms-to-results.p.rapidapi.com/analyzeSymptomsAndDiagnose?noqueue=1', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-rapidapi-host': 'ai-medical-diagnosis-api-symptoms-to-results.p.rapidapi.com',
-          'x-rapidapi-key': RAPID_API_KEY
-        },
-        body: JSON.stringify({
-          symptoms: [text],
-          patientInfo: {
-            age: 35, gender: "female", height: 165, weight: 65,
-            medicalHistory: ["hypertension"], currentMedications: [],
-            allergies: [], lifestyle: { smoking: false, alcohol: "occasional", exercise: "moderate", diet: "balanced" }
-          },
-          lang: "en"
-        })
-      });
-
       let aiResponse = "";
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result.diagnosis && result.diagnosis.length > 0) {
-          const top = result.diagnosis[0];
-          aiResponse = `### 🩺 Clinical Analysis: **${top.name}**
-**Confidence:** ${Math.round(top.probability * 100)}%
+      // 1. Attempt Gemini Pro (High Quality)
+      if (GEMINI_API_KEY && !GEMINI_API_KEY.includes("Replace")) {
+        try {
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+          const response = await fetch(geminiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{
+                  text: `You are a professional Pulmonology Specialist. A patient reports: "${text}". 
+                  Analyze these symptoms specifically for lung health. 
+                  Provide a structured response in Markdown:
+                  1. 🩺 Clinical Impression (Possible conditions like Pneumonia, Asthma, etc.)
+                  2. ⚠️ Risk Analysis (Potential complications)
+                  3. 🛑 Safety Cautions (When to seek emergency care)
+                  4. 📋 Recommended Actions (Tests, consultations)
+                  Keep it professional, empathetic, and clear. Always include a disclaimer.`
+                }]
+              }]
+            })
+          });
 
-**Details:** ${top.description || 'Consult a specialist for a detailed evaluation.'}
-
----
-
-### ⚠️ Risks & Cautions
-- **Progression:** Early intervention is key to preventing lung tissue damage.
-- **Caution:** Do not ignore persistent respiratory symptoms.
-
----
-
-### 📋 Recommendations
-${result.recommendations?.map(r => `• ${r}`).join('\n') || '• Consult a pulmonologist.'}`;
+          const data = await response.json();
+          if (data.candidates && data.candidates[0].content.parts[0].text) {
+            aiResponse = data.candidates[0].content.parts[0].text;
+          }
+        } catch (err) {
+          console.error("Gemini Error:", err);
         }
       }
 
-      // If API failed or returned no result, use local match if available
-      if (!aiResponse && localMatch) {
-        aiResponse = formatDiseaseResponse(localMatch);
+      // 2. Fallback to RapidAPI if Gemini fails or is not configured
+      if (!aiResponse) {
+        // ... (previous RapidAPI logic could go here, but Gemini is better)
+        // For now, we'll use our Local Match as the primary fallback
+        if (localMatch) {
+          aiResponse = formatDiseaseResponse(localMatch);
+        }
       }
 
-      // Final Fallback
+      // 3. Final Generic Fallback
       if (!aiResponse) {
         aiResponse = `### 🔍 Observation
-I couldn't find an exact match for "${text}". 
-
-**General Lung Health Advice:**
-- If you have a persistent cough (>3 weeks), please consult a doctor.
-- Avoid pollutants and smoking.
-- Consider using our **X-Ray module** for image-based detection.`;
+        I couldn't generate a specific analysis. Please ensure you have configured your Gemini API Key in the .env file.
+        
+        **General Advice:**
+        - Persistent cough (>3 weeks) needs medical attention.
+        - Check our **X-Ray Analysis** for imaging insights.`;
       }
 
       setMessages(prev => [...prev, { id: Date.now() + 1, text: aiResponse, isUser: false }]);
