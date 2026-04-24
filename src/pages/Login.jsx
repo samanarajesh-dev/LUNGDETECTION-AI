@@ -40,7 +40,11 @@ export default function Login() {
     });
 
     if (!error) {
-      navigate('/home');
+      if (loginRole === 'doctor') {
+        navigate('/doctor-home');
+      } else {
+        navigate('/home');
+      }
     } else {
       setErrorMsg(error);
     }
