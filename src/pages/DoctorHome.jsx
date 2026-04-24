@@ -4,7 +4,7 @@ import {
   Users, Calendar, FileText, ClipboardList, Package, 
   Settings, MessageSquare, ShieldCheck, Activity, 
   TrendingUp, Video, CreditCard, Bell, LogOut, Search,
-  Plus, MoreVertical, UserCheck, Heart, Stethoscope
+  Plus, MoreVertical, UserCheck, Heart, Stethoscope, Zap
 } from 'lucide-react';
 
 export default function DoctorHome() {
