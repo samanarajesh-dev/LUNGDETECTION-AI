@@ -241,53 +241,53 @@ export default function Chat() {
                 )}
 
                 {/* Question Section */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10 shadow-2xl">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10 shadow-lg">
                       {WIZARD_STEPS[wizardStep].icon}
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold text-white tracking-tight leading-tight">{WIZARD_STEPS[wizardStep].question}</h2>
-                      <p className="text-xs text-text-muted mt-1 font-medium">{WIZARD_STEPS[wizardStep].description}</p>
+                      <h2 className="text-base font-bold text-white tracking-tight leading-tight">{WIZARD_STEPS[wizardStep].question}</h2>
+                      <p className="text-[10px] text-text-muted mt-0.5 font-medium">{WIZARD_STEPS[wizardStep].description}</p>
                     </div>
                   </div>
 
                   {/* Interactive UI */}
-                  <div className="py-8">
+                  <div className="py-4">
                     {WIZARD_STEPS[wizardStep].type === 'counter' && (
-                      <div className="bg-card border border-border-subtle p-8 rounded-[32px] flex flex-col items-center shadow-2xl">
-                        <div className="flex items-center gap-12">
+                      <div className="bg-card border border-border-subtle p-6 rounded-[28px] flex flex-col items-center shadow-xl">
+                        <div className="flex items-center gap-10">
                           <button 
                             onClick={() => setAssessmentData(p => ({...p, coughDays: Math.max(0, p.coughDays - 1)}))}
-                            className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all hover:scale-110 active:scale-95"
+                            className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all active:scale-95"
                           >
-                            <Minus size={28} className="text-white" />
+                            <Minus size={20} className="text-white" />
                           </button>
                           <div className="flex flex-col items-center">
-                            <span className="text-7xl font-black text-white tabular-nums tracking-tighter">{assessmentData.coughDays}</span>
-                            <span className="text-[10px] text-cyan-400 uppercase tracking-[0.4em] mt-3 font-black">Days Duration</span>
+                            <span className="text-5xl font-black text-white tabular-nums tracking-tighter">{assessmentData.coughDays}</span>
+                            <span className="text-[9px] text-cyan-400 uppercase tracking-[0.3em] mt-2 font-black">Days</span>
                           </div>
                           <button 
                             onClick={() => setAssessmentData(p => ({...p, coughDays: p.coughDays + 1}))}
-                            className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all hover:scale-110 active:scale-95"
+                            className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all active:scale-95"
                           >
-                            <Plus size={28} className="text-white" />
+                            <Plus size={20} className="text-white" />
                           </button>
                         </div>
                       </div>
                     )}
 
                     {WIZARD_STEPS[wizardStep].type === 'select' && (
-                      <div className="grid grid-cols-1 gap-3">
+                      <div className="grid grid-cols-1 gap-2">
                         {WIZARD_STEPS[wizardStep].options.map(opt => (
                           <button
                             key={opt}
                             onClick={() => setAssessmentData(p => ({...p, [WIZARD_STEPS[wizardStep].field]: opt}))}
-                            className={`group relative p-5 rounded-[24px] border text-left transition-all duration-300 overflow-hidden ${assessmentData[WIZARD_STEPS[wizardStep].field] === opt ? 'bg-white border-white shadow-2xl scale-[1.02]' : 'bg-white/5 border-white/10 hover:bg-white/[0.08]'}`}
+                            className={`group relative p-4 rounded-[20px] border text-left transition-all duration-300 overflow-hidden ${assessmentData[WIZARD_STEPS[wizardStep].field] === opt ? 'bg-white border-white shadow-xl scale-[1.01]' : 'bg-white/5 border-white/10 hover:bg-white/[0.06]'}`}
                           >
                             <div className="relative z-10 flex justify-between items-center">
-                              <span className={`text-sm font-bold ${assessmentData[WIZARD_STEPS[wizardStep].field] === opt ? 'text-gray-900' : 'text-white/80'}`}>{opt}</span>
-                              {assessmentData[WIZARD_STEPS[wizardStep].field] === opt && <ArrowRight size={18} className="text-gray-900" />}
+                              <span className={`text-[13px] font-bold ${assessmentData[WIZARD_STEPS[wizardStep].field] === opt ? 'text-gray-900' : 'text-white/70'}`}>{opt}</span>
+                              {assessmentData[WIZARD_STEPS[wizardStep].field] === opt && <ArrowRight size={16} className="text-gray-900" />}
                             </div>
                             {assessmentData[WIZARD_STEPS[wizardStep].field] === opt && (
                               <motion.div layoutId="activeBG" className="absolute inset-0 bg-white" />
@@ -299,27 +299,28 @@ export default function Chat() {
                   </div>
                 </div>
 
-                {/* Confirm / Continue Button */}
-                <div className="pt-4 flex items-center gap-4">
-                   <button 
-                    onClick={() => setWizardStep(prev => Math.max(0, prev - 1))}
-                    disabled={wizardStep === 0}
-                    className="w-16 h-16 rounded-[24px] bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all disabled:opacity-0"
-                  >
-                    <ChevronLeft size={24} />
-                  </button>
+                {/* Centered Action Button */}
+                <div className="pt-4 flex flex-col items-center gap-6">
                   <button 
                     onClick={handleNextStep}
-                    className="flex-1 py-5 rounded-[24px] bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-xs uppercase tracking-[0.25em] shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 hover:scale-[1.02] transition-all active:scale-[0.98]"
+                    className="w-full max-w-[280px] py-4 rounded-[22px] bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 hover:scale-[1.03] transition-all active:scale-[0.98]"
                   >
                     {wizardStep === WIZARD_STEPS.length - 1 ? 'Finish Assessment' : 'Continue'}
-                    <ArrowRight size={18} />
+                    <ArrowRight size={16} />
+                  </button>
+
+                  <button 
+                    onClick={() => setWizardStep(prev => Math.max(0, prev - 1))}
+                    disabled={wizardStep === 0}
+                    className={`text-[10px] font-bold uppercase tracking-widest text-text-muted hover:text-white transition-all ${wizardStep === 0 ? 'opacity-0 pointer-events-none' : 'opacity-60'}`}
+                  >
+                    Return to previous step
                   </button>
                 </div>
 
-                <div className="flex items-center gap-3 px-4 py-3 bg-amber-500/5 rounded-2xl border border-amber-500/10">
-                   <Info size={14} className="text-amber-500" />
-                   <p className="text-[10px] text-amber-500/80 font-bold uppercase tracking-wider">This data is end-to-end encrypted and used only for analysis.</p>
+                <div className="flex items-center gap-2 justify-center py-2 px-4 bg-white/5 rounded-xl border border-white/5 max-w-fit mx-auto">
+                   <Info size={12} className="text-cyan-500/50" />
+                   <p className="text-[9px] text-text-muted font-bold uppercase tracking-wider">Encrypted Data</p>
                 </div>
               </motion.div>
             </AnimatePresence>
