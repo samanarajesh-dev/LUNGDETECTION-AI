@@ -50,6 +50,7 @@ export function AuthProvider({ children }) {
               first_name: extraData.first_name || '',
               last_name: extraData.last_name || '',
               role: extraData.role || 'patient',
+              license_id: extraData.license_id || '',
             }
           }
         });
