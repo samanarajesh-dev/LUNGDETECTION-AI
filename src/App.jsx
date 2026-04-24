@@ -12,6 +12,7 @@ import MedicalHistory from './pages/MedicalHistory';
 import AIInsights from './pages/AIInsights';
 import RecoveryPlan from './pages/RecoveryPlan';
 import Medications from './pages/Medications';
+import Telemedicine from './pages/Telemedicine';
 import PageWrapper from './components/layout/PageWrapper';
 
 // Simple placeholder for unimplemented dash routes
@@ -43,7 +44,7 @@ const router = createBrowserRouter([
   { path: '/cough-detect', element: <ProtectedRoute><Placeholder title="Cough Detect" /></ProtectedRoute> },
   { path: '/breathing', element: <ProtectedRoute><Breathing /></ProtectedRoute> },
   { path: '/analytics', element: <ProtectedRoute><MedicalHistory /></ProtectedRoute> },
-  { path: '/telemedicine', element: <ProtectedRoute><Placeholder title="Telemedicine" /></ProtectedRoute> },
+  { path: '/telemedicine', element: <ProtectedRoute><Telemedicine /></ProtectedRoute> },
   { path: '/hospitals', element: <ProtectedRoute><Placeholder title="Nearby Hospitals" /></ProtectedRoute> },
   { path: '/medications', element: <ProtectedRoute><Medications /></ProtectedRoute> },
   { path: '/settings', element: <ProtectedRoute><Placeholder title="Settings" /></ProtectedRoute> }
