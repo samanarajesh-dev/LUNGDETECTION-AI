@@ -9,8 +9,8 @@ export default function Chat() {
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef(null);
 
-  // Hardcoded key for debugging since env might not be reloading
-  const RAPID_API_KEY = '29d5f5b5d3msh98bf5456fed56b1p1b97d1jsn081ee3cee23c';
+  // Use env key for security
+  const RAPID_API_KEY = import.meta.env.VITE_RAPIDAPI_KEY;
 
   useEffect(() => {
     if (scrollRef.current) {

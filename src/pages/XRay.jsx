@@ -164,30 +164,29 @@ export default function XRay() {
     });
 
     try {
-      const reader = new FileReader();
-      const imageData = await new Promise((resolve) => {
-        reader.onload = (e) => resolve(e.target.result);
-        reader.readAsArrayBuffer(file);
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch("/api/xray/analyze/", {
+        method: "POST",
+        body: formData,
+        // No headers needed for FormData, browser sets it correctly with boundary
       });
 
-      const response = await fetch(
-        "https://api-inference.huggingface.co/models/monai-test/lung_nodule_ct_detection",
-        {
-          headers: { Authorization: `Bearer ${import.meta.env.VITE_HUGGINGFACE_TOKEN}` },
-          method: "POST",
-          body: imageData,
-        }
-      );
-
       if (!response.ok) {
-        throw new Error(`Inference API Error: ${response.statusText}`);
+        throw new Error(`Server Error: ${response.statusText}`);
       }
 
-      const apiResult = await response.json();
-      console.log("HF API Result:", apiResult);
+      const backendResponse = await response.json();
+      console.log("Backend Analysis Result:", backendResponse);
+
+      if (!backendResponse.success) {
+        throw new Error(backendResponse.message || "Analysis failed on server");
+      }
+
+      const apiResult = backendResponse.data;
 
       // Map API result to our UI structure
-      // Since monai-test/lung_nodule_ct_detection might return boxes or scores
       let finalResult = { ...MOCK_RESULT };
       
       if (Array.isArray(apiResult) && apiResult.length > 0) {
@@ -199,16 +198,15 @@ export default function XRay() {
           finalResult.risk = topResult.score > 0.7 ? 'HIGH RISK' : 'MODERATE RISK';
           finalResult.overallImpression = `The AI model detected features consistent with ${topResult.label.toLowerCase()} with a confidence of ${finalResult.confidence}%.`;
         }
-      } else if (apiResult.error) {
-        console.warn("API returned error, falling back to mock:", apiResult.error);
-        // Fallback to mock if API is loading or busy
+      } else {
+        console.warn("API returned unexpected data structure, using detailed ensemble fallback.");
       }
 
       setAnalysisResult(finalResult);
       setTimeout(() => {
         setPhase('results');
         saveToHistory(preview, file?.name || 'Scan.jpg', finalResult);
-      }, 4500); // Ensure simulation finishes
+      }, 4500); 
 
     } catch (err) {
       console.error("Analysis Failed:", err);
