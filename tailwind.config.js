@@ -35,6 +35,15 @@ export default {
       backgroundImage: {
         'gradient-hero': 'linear-gradient(135deg, #0D1B2A 0%, #0F3D52 50%, #0E6E6E 100%)',
         'gradient-button': 'linear-gradient(90deg, #1B4F8A, #319795)',
+      },
+      animation: {
+        'pulse-slow': 'pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
+      keyframes: {
+        'pulse-slow': {
+          '0%, 100%': { opacity: '0.1' },
+          '50%': { opacity: '0.3' },
+        }
       }
     },
   },
