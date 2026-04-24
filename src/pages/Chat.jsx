@@ -11,7 +11,6 @@ export default function Chat() {
   const [phase, setPhase] = useState('wizard'); // wizard | chat
   const [wizardStep, setWizardStep] = useState(0);
   const [showReport, setShowReport] = useState(false);
-  const [streamingText, setStreamingText] = useState('');
   
   const [assessmentData, setAssessmentData] = useState({
     coughDays: 0,
@@ -132,7 +131,7 @@ export default function Chat() {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, isLoading, streamingText]);
+  }, [messages, isLoading]);
 
   const handleSend = async (text, isInitialContext = false) => {
     if (!text.trim()) return;
@@ -140,22 +139,20 @@ export default function Chat() {
       setMessages(prev => [...prev, { id: Date.now(), text, isUser: true }]);
     }
     setIsLoading(true);
-    setStreamingText('');
 
     try {
       if (GEMINI_API_KEY) {
-        // --- USING STREAMING FOR MAXIMUM EFFICIENCY ---
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:streamGenerateContent?key=${GEMINI_API_KEY}`;
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
         const prompt = isInitialContext 
           ? `You are a Professional Pulmonology Specialist. Provide a URGENT SUSPECTED DIAGNOSIS based on:
              ${text}
-             Structure your response with clear headings:
-             # 🩺 Suspected Clinical Condition: [Condition Name]
+             Structure:
+             # 🩺 Suspected Clinical Condition: [Name]
              ### 🔍 Diagnostic Rationale
              ### ⚠️ Risk & Severity Level
              ### 🛑 Emergency Red Flags
              ### 📋 Next Clinical Steps
-             Include a standard medical disclaimer.`
+             Disclaimer: AI-generated screening.`
           : `Patient: "${text}". Context: ${JSON.stringify(assessmentData)}. Pulmonology response required.`;
 
         const response = await fetch(geminiUrl, {
@@ -164,38 +161,26 @@ export default function Chat() {
           body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let fullText = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          
-          const chunk = decoder.decode(value, { stream: true });
-          // Gemini sends multiple JSON objects in the stream
-          try {
-            const lines = chunk.split('\n');
-            for (const line of lines) {
-              if (line.trim().startsWith('{')) {
-                const json = JSON.parse(line.replace(/^,/, ''));
-                const content = json.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (content) {
-                  fullText += content;
-                  setStreamingText(fullText);
-                }
-              }
-            }
-          } catch (e) {
-            // Partial JSON or other streaming artifact, skip for now
-          }
+        const data = await response.json();
+        
+        if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+          setMessages(prev => [...prev, { 
+            id: Date.now() + 1, 
+            text: data.candidates[0].content.parts[0].text, 
+            isUser: false 
+          }]);
+        } else if (data.error) {
+          setMessages(prev => [...prev, { 
+            id: Date.now() + 1, 
+            text: `### ⚠️ API Error\n${data.error.message || "Unknown Error"}\nPlease verify your API key and quota.`, 
+            isUser: false 
+          }]);
         }
-
-        setMessages(prev => [...prev, { id: Date.now() + 1, text: fullText, isUser: false }]);
-        setStreamingText('');
+      } else {
+        setMessages(prev => [...prev, { id: Date.now() + 1, text: "API Key Missing. Please check your .env file.", isUser: false }]);
       }
     } catch (error) {
-      setMessages(prev => [...prev, { id: Date.now() + 1, text: "Connectivity Error: AI diagnostic engine is busy. Please try again in a moment.", isUser: false }]);
+      setMessages(prev => [...prev, { id: Date.now() + 1, text: "Connection Error: Failed to reach the diagnostic engine.", isUser: false }]);
     } finally {
       setIsLoading(false);
     }
@@ -212,10 +197,7 @@ export default function Chat() {
           </button>
           <div>
             <h1 className="text-xl font-black text-white tracking-tight">AI Doctor</h1>
-            <div className="flex items-center gap-2">
-               <Zap size={10} className="text-emerald-500 fill-emerald-500" />
-               <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-[0.2em]">Ultra-Fast Streaming Active</p>
-            </div>
+            <p className="text-[10px] text-text-muted font-bold uppercase tracking-[0.2em]">Diagnostic Engine Active</p>
           </div>
         </div>
         
@@ -282,11 +264,10 @@ export default function Chat() {
         ) : (
           <div ref={scrollRef} className="flex-1 overflow-y-auto max-w-[800px] mx-auto w-full px-4 pt-4 scrollbar-none">
             {messages.map((msg) => <MessageBubble key={msg.id} message={msg.text} isUser={msg.isUser} />)}
-            {streamingText && <MessageBubble message={streamingText} isUser={false} />}
-            {isLoading && !streamingText && (
+            {isLoading && (
               <div className="flex items-center gap-3 p-6 text-cyan-400 bg-cyan-500/5 rounded-[32px] border border-cyan-500/10 mx-4 animate-pulse">
                 <Loader2 className="animate-spin" size={20} />
-                <span className="text-[10px] font-black uppercase tracking-widest">Clinical Analysis Core Active...</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">Clinical Analysis in Progress...</span>
               </div>
             )}
           </div>
@@ -306,17 +287,6 @@ export default function Chat() {
                 <button onClick={() => setShowReport(false)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition"><ChevronLeft size={20} className="text-white" /></button>
               </div>
               <div className="p-8 overflow-y-auto space-y-6 scrollbar-none">
-                {/* Risk Bar */}
-                <div className="p-5 bg-white/5 rounded-3xl border border-white/5">
-                   <div className="flex justify-between items-center mb-3">
-                      <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest">Severity Index</p>
-                      <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Analysis Active</span>
-                   </div>
-                   <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
-                      <motion.div initial={{ width: 0 }} animate={{ width: '65%' }} className="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-rose-500" />
-                   </div>
-                </div>
-
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { l: 'Cough Duration', v: `${assessmentData.coughDays} Days` },
@@ -333,10 +303,10 @@ export default function Chat() {
                   ))}
                 </div>
                 <div className="p-6 bg-white/5 border border-white/5 rounded-[32px] space-y-3">
-                  <div className="flex items-center gap-2 text-emerald-500 font-black text-[10px] uppercase tracking-widest"><ShieldCheck size={16}/> Engine Status</div>
-                  <p className="text-xs text-text-secondary leading-relaxed font-medium">Diagnostic result saved. Please refer to your chat history for full clinical reasoning and rationale provided by the AI Specialist.</p>
+                  <div className="flex items-center gap-2 text-emerald-500 font-black text-[10px] uppercase tracking-widest"><ShieldCheck size={16}/> Analysis Result</div>
+                  <p className="text-xs text-text-secondary leading-relaxed font-medium">Diagnostic result saved. Please refer to your chat history for full clinical reasoning.</p>
                 </div>
-                <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex gap-3 italic text-[9px] text-amber-500/70"><AlertTriangle size={16} className="shrink-0"/> Screening report only. Consult a Pulmonologist for definitive diagnosis.</div>
+                <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex gap-3 italic text-[9px] text-amber-500/70"><AlertTriangle size={16} className="shrink-0"/> Screening report only. Consult a Pulmonologist.</div>
               </div>
               <div className="p-8 border-t border-white/5"><button onClick={() => window.print()} className="w-full py-4 bg-white text-gray-900 rounded-2xl font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3"><Download size={16}/> Print Official Record</button></div>
             </motion.div>
