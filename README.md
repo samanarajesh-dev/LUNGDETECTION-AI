@@ -62,6 +62,13 @@ npm run dev:all
 - `/backend`: Django backend source code.
 - `/public`: Static assets for the frontend.
 - `vite.config.js`: Vite configuration including the backend proxy.
+- `/research`: Data analysis scripts for lung-specific datasets (e.g., Hugging Face `virtual10/lungs_cancer`).
+
+## 🧪 Research & Data
+
+The AI Doctor module is designed to provide insights aligned with clinical research datasets. You can explore our dataset analysis tools in the `/research` folder:
+- **Dataset**: `virtual10/lungs_cancer` (Hugging Face)
+- **Tool**: `python research/analyze_dataset.py`
 
 ## 📄 License
 

@@ -61,9 +61,49 @@ export default function Chat() {
       let aiResponse = "";
       if (result.diagnosis && result.diagnosis.length > 0) {
         const top = result.diagnosis[0];
-        aiResponse = `Analysis Complete. \n\n**Primary Diagnosis:** ${top.name}\n**Probability:** ${Math.round(top.probability * 100)}%\n\n**Details:** ${top.description || 'No additional details.'}\n\n**Recommended Actions:** ${result.recommendations?.join(', ') || 'Consult a physician.'}`;
+        const prob = Math.round(top.probability * 100);
+        
+        aiResponse = `### 🩺 Clinical Analysis: **${top.name}**
+**Confidence Level:** ${prob}%
+
+**What this means:**
+${top.description || 'This condition requires clinical evaluation to confirm clinical presentation.'}
+
+---
+
+### ⚠️ Risks & Complications
+- **Progression:** Without intervention, symptoms may intensify.
+- **Respiratory Strain:** Potential impact on lung capacity and oxygen saturation.
+- **Secondary Infection:** Weakened lung tissue may be susceptible to further bacterial complications.
+
+---
+
+### 🛑 Critical Cautions
+- **Immediate Care:** If you experience severe shortness of breath or blue-tinted lips, seek **emergency care** immediately.
+- **Verification:** This AI insight is based on statistical data and **cannot** replace a physical examination or radiological imaging (X-Ray/CT).
+- **Medication:** Do not start any new medications without a prescription.
+
+---
+
+### 📋 Recommended Next Steps
+${result.recommendations?.map(r => `• ${r}`).join('\n') || '• Schedule a consultation with a Pulmonologist.\n• Consider a low-dose CT scan if symptoms persist.'}`;
+
       } else {
-        aiResponse = "I've analyzed your input but couldn't find a specific clinical match. Could you describe your symptoms in more detail?";
+        // High-quality fallback for lung-related queries
+        aiResponse = `### 🔍 Preliminary Observation
+I couldn't find a definitive match for those specific symptoms in my current diagnostic database, but since you are tracking **Lung Health**, here is what you should consider:
+
+**Common Red Flags:**
+- Persistent cough lasting more than 3 weeks.
+- Coughing up blood (even small amounts).
+- Unexplained weight loss or fatigue.
+- Chest pain that worsens with deep breathing.
+
+**⚠️ Risks & Cautions:**
+- Lung conditions can progress silently. Early detection is the most significant factor in successful recovery.
+- **Caution:** Avoid self-diagnosing. Environmental factors (pollution, smoking) significantly increase pulmonary risks.
+
+**Next Step:** I recommend using our **X-Ray Analysis** module or uploading a recent report for a more accurate assessment.`;
       }
 
       setMessages(prev => [...prev, { 
