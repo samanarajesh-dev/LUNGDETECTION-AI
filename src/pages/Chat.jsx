@@ -55,6 +55,14 @@ export default function Chat() {
         })
       });
 
+      if (response.status === 403) {
+        throw new Error("RapidAPI_403: Your API Key is not subscribed to the 'AI Medical Diagnosis' plan. Please check your RapidAPI dashboard.");
+      }
+
+      if (!response.ok) {
+        throw new Error(`API_Error: ${response.status} - ${response.statusText}`);
+      }
+
       const result = await response.json();
       console.log("API Response:", result);
       
