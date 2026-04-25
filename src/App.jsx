@@ -17,6 +17,7 @@ import DoctorHome from './pages/DoctorHome';
 import DoctorBooking from './pages/DoctorBooking';
 import DoctorSchedule from './pages/DoctorSchedule';
 import DoctorPatientReg from './pages/DoctorPatientReg';
+import PatientCard from './pages/PatientCard';
 import PageWrapper from './components/layout/PageWrapper';
 
 // Simple placeholder for unimplemented dash routes
@@ -52,6 +53,7 @@ const router = createBrowserRouter([
   { path: '/doctor-booking', element: <ProtectedRoute><DoctorBooking /></ProtectedRoute> },
   { path: '/doctor-schedule', element: <ProtectedRoute><DoctorSchedule /></ProtectedRoute> },
   { path: '/doctor-patient-reg', element: <ProtectedRoute><DoctorPatientReg /></ProtectedRoute> },
+  { path: '/patient-card', element: <ProtectedRoute><PatientCard /></ProtectedRoute> },
   { path: '/telemedicine', element: <ProtectedRoute><Telemedicine /></ProtectedRoute> },
   { path: '/hospitals', element: <ProtectedRoute><Placeholder title="Nearby Hospitals" /></ProtectedRoute> },
   { path: '/medications', element: <ProtectedRoute><Medications /></ProtectedRoute> },

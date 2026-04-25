@@ -225,7 +225,10 @@ export default function DoctorPatientReg() {
                  >
                     Return to Hub
                  </button>
-                 <button className="px-10 py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition">
+                 <button 
+                  onClick={() => navigate('/patient-card')}
+                  className="px-10 py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition"
+                 >
                     View Patient Card
                  </button>
               </div>
