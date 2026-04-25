@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ChevronLeft, ShieldCheck, QrCode, User, Droplets, 
   Calendar, Phone, Mail, MapPin, Download, Share2,
-  Heart, Activity, Zap, CheckCircle2
+  Heart, Activity, Zap, CheckCircle2, Stethoscope
 } from 'lucide-react';
 
 export default function PatientCard() {
