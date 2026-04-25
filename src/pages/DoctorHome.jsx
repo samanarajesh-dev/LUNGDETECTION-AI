@@ -24,7 +24,7 @@ export default function DoctorHome() {
       cards: [
         { id: '1', title: 'Online Booking', desc: 'Appointment schedules', icon: Calendar, path: '/doctor-booking', gradient: 'linear-gradient(135deg,#2B6CB0,#4299E1)' },
         { id: '2', title: 'Patient Registration', desc: 'Secure clinical accounts', icon: Users, path: '/doctor-patient-reg', gradient: 'linear-gradient(135deg,#319795,#4FD1C5)' },
-        { id: '3', title: 'Doctor Profiles', desc: 'Credentials & Experience', icon: UserCircle, path: '/doctor-home', gradient: 'linear-gradient(135deg,#553C9A,#805AD5)' },
+        { id: '3', title: 'Doctor Profiles', desc: 'Credentials & Experience', icon: UserCircle, path: '/doctor-profiles', gradient: 'linear-gradient(135deg,#553C9A,#805AD5)' },
         { id: '4', title: 'Medical History', desc: 'Past visits & records', icon: History, path: '/doctor-home', gradient: 'linear-gradient(135deg,#276749,#48BB78)' },
         { id: '5', title: 'Lab Reports', desc: 'Downloadable results', icon: FileSpreadsheet, path: '/doctor-home', gradient: 'linear-gradient(135deg,#086F83,#0BC5EA)' },
         { id: '6', title: 'E-Prescriptions', desc: 'Digital prescriptions', icon: FileText, path: '/doctor-home', gradient: 'linear-gradient(135deg,#2C5282,#63B3ED)' },
