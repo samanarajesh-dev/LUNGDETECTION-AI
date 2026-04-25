@@ -22,7 +22,7 @@ export default function DoctorHome() {
       title: "Patient-Facing Services",
       icon: <UserCircle size={18} className="text-blue-400" />,
       cards: [
-        { id: '1', title: 'Online Booking', desc: 'Appointment schedules', icon: Calendar, path: '/doctor-home', gradient: 'linear-gradient(135deg,#2B6CB0,#4299E1)' },
+        { id: '1', title: 'Online Booking', desc: 'Appointment schedules', icon: Calendar, path: '/doctor-booking', gradient: 'linear-gradient(135deg,#2B6CB0,#4299E1)' },
         { id: '2', title: 'Patient Registration', desc: 'Secure clinical accounts', icon: Users, path: '/doctor-home', gradient: 'linear-gradient(135deg,#319795,#4FD1C5)' },
         { id: '3', title: 'Doctor Profiles', desc: 'Credentials & Experience', icon: UserCircle, path: '/doctor-home', gradient: 'linear-gradient(135deg,#553C9A,#805AD5)' },
         { id: '4', title: 'Medical History', desc: 'Past visits & records', icon: History, path: '/doctor-home', gradient: 'linear-gradient(135deg,#276749,#48BB78)' },
