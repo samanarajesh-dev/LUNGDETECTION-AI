@@ -37,7 +37,7 @@ export default function DoctorHome() {
       title: "Clinic Management",
       icon: <LayoutDashboard size={18} className="text-emerald-400" />,
       cards: [
-        { id: '10', title: 'Appt. Dashboard', desc: 'Manage visit schedule', icon: LayoutDashboard, path: '/doctor-home', gradient: 'linear-gradient(135deg,#702459,#F687B3)' },
+        { id: '10', title: 'Appt. Dashboard', desc: 'Manage visit schedule', icon: LayoutDashboard, path: '/doctor-schedule', gradient: 'linear-gradient(135deg,#702459,#F687B3)' },
         { id: '11', title: 'EHR System', desc: 'Electronic health storage', icon: BookOpen, path: '/doctor-home', gradient: 'linear-gradient(135deg,#1D4044,#4FD1C5)' },
         { id: '12', title: 'Prescription Sys.', desc: 'Digital management', icon: ClipboardList, path: '/doctor-home', gradient: 'linear-gradient(135deg,#2A4365,#90CDF4)' },
         { id: '13', title: 'Invoice Gen.', desc: 'Generate clinical bills', icon: Receipt, path: '/doctor-home', gradient: 'linear-gradient(135deg,#744210,#ECC94B)' },

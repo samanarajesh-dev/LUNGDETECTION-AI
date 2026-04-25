@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
   Calendar as CalendarIcon, Clock, User, MessageSquare, 
   ChevronLeft, CheckCircle2, AlertCircle, ChevronRight,
@@ -7,6 +6,7 @@ import {
 } from 'lucide-react';
 
 export default function DoctorBooking() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [bookingData, setBookingData] = useState({
     date: '',
@@ -230,7 +230,10 @@ export default function DoctorBooking() {
                  >
                     Back to Dashboard
                  </button>
-                 <button className="px-10 py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition">
+                 <button 
+                  onClick={() => navigate('/doctor-schedule')}
+                  className="px-10 py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition"
+                 >
                     View My Schedule
                  </button>
               </div>
